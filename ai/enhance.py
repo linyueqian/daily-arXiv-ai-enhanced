@@ -34,6 +34,16 @@ def main():
         for line in f:
             data.append(json.loads(line))
 
+    # Handle empty data case
+    if not data:
+        print('No papers found in input file', file=sys.stderr)
+        # Create empty AI-enhanced file
+        output_file = args.data.replace('.jsonl', f'_AI_enhanced_{language}.jsonl')
+        with open(output_file, 'w') as f:
+            pass  # Create empty file
+        print(f'Created empty output file: {output_file}', file=sys.stderr)
+        return
+
     seen_ids = set()
     unique_data = []
     for item in data:

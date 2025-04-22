@@ -2,6 +2,7 @@ import json
 import argparse
 import os
 from itertools import count
+import sys
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -15,6 +16,16 @@ if __name__ == "__main__":
     with open(args.data, "r") as f:
         for line in f:
             data.append(json.loads(line))
+
+    # Handle empty data case
+    if not data:
+        print('No papers found in input file', file=sys.stderr)
+        # Create empty markdown file
+        output_file = args.data.split('_')[0] + '.md'
+        with open(output_file, 'w') as f:
+            f.write("# No New Papers Today\n\nNo new papers were found in the specified categories.")
+        print(f'Created empty markdown file: {output_file}', file=sys.stderr)
+        exit(0)
 
     # 只保留配置文件中指定的类别
     categories = preference
