@@ -12,6 +12,10 @@ BOT_NAME = "daily_arxiv"
 SPIDER_MODULES = ["daily_arxiv.spiders"]
 NEWSPIDER_MODULE = "daily_arxiv.spiders"
 
+# Set the feed URI to the correct location
+import os
+today = os.environ.get('TODAY', '2025-04-22')
+FEED_URI = f"../data/{today}.jsonl"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "daily_arxiv (+http://www.yourdomain.com)"
