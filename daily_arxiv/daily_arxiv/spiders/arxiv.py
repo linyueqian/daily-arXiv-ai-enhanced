@@ -24,9 +24,16 @@ class ArxivSpider(scrapy.Spider):
             valid_categories = [cat for cat in categories if cat in self.target_categories]
             
             if valid_categories:  # 如果论文属于我们感兴趣的类别
-                yield {
-                    "id": paper.css("a[title='Abstract']::attr(href)")
-                    .get()
-                    .split("/")[-1],  # 提取论文链接
-                    "categories": valid_categories  # 保存有效的类别
-                }
+                paper_id = paper.css("a[title='Abstract']::attr(href)").get()
+                if paper_id:  # 确保我们有有效的论文ID
+                    paper_id = paper_id.split("/")[-1]
+                    yield {
+                        "id": paper_id,
+                        "pdf": f"https://arxiv.org/pdf/{paper_id}",
+                        "abs": f"https://arxiv.org/abs/{paper_id}",
+                        "authors": paper.css("div.list-authors a::text").getall(),
+                        "title": paper.css("div.list-title::text").get().strip(),
+                        "categories": valid_categories,
+                        "comment": paper.css("div.list-comments::text").get(),
+                        "summary": paper.css("p.mathjax::text").get()
+                    }
