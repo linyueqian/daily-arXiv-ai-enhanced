@@ -17,17 +17,7 @@ class ArxivSpider(scrapy.Spider):
 
     def parse(self, response):
         # 提取每篇论文的信息
-        anchors = []
-        for li in response.css("div[id=dlpage] ul li"):
-            anchors.append(int(li.css("a::attr(href)").get().split("item")[-1]))
-
         for paper in response.css("dl dt"):
-            if (
-                int(paper.css("a[name^='item']::attr(name)").get().split("item")[-1])
-                >= anchors[-1]
-            ):
-                continue
-
             # 获取论文的类别
             categories = paper.css("span.list-identifier a::text").getall()
             # 只保留我们感兴趣的类别
