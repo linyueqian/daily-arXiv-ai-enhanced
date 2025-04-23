@@ -18,22 +18,34 @@ class ArxivSpider(scrapy.Spider):
     def parse(self, response):
         # 提取每篇论文的信息
         for paper in response.css("dl dt"):
-            # 获取论文的类别
-            categories = paper.css("span.list-identifier a::text").getall()
-            # 只保留我们感兴趣的类别
-            valid_categories = [cat for cat in categories if cat in self.target_categories]
+            paper_id = paper.css("a[title='Abstract']::attr(href)").get()
             
-            if valid_categories:  # 如果论文属于我们感兴趣的类别
-                paper_id = paper.css("a[title='Abstract']::attr(href)").get()
-                if paper_id:  # 确保我们有有效的论文ID
-                    paper_id = paper_id.split("/")[-1]
+            if paper_id:  # 确保我们有有效的论文ID
+                paper_id = paper_id.split("/")[-1]
+                # Get the corresponding dd element which contains author and other info
+                dd = paper.xpath('./following-sibling::dd[1]')
+                
+                # Extract categories text content
+                subjects_div = dd.css('div.list-subjects')
+                subjects_text = subjects_div.xpath('string()').get()
+                
+                # Check if any of our target categories are in the subjects text
+                categories = []
+                if subjects_text:
+                    for cat in self.target_categories:
+                        if cat in subjects_text:
+                            categories.append(cat)
+                
+                if categories:  # 如果论文属于我们感兴趣的类别
+                    self.logger.info(f"Found paper: {paper_id} with categories: {categories}")
+                    
                     yield {
                         "id": paper_id,
                         "pdf": f"https://arxiv.org/pdf/{paper_id}",
                         "abs": f"https://arxiv.org/abs/{paper_id}",
-                        "authors": paper.css("div.list-authors a::text").getall(),
-                        "title": paper.css("div.list-title::text").get().strip(),
-                        "categories": valid_categories,
-                        "comment": paper.css("div.list-comments::text").get(),
-                        "summary": paper.css("p.mathjax::text").get()
+                        "authors": dd.css("div.list-authors a::text").getall(),
+                        "title": dd.css("div.list-title::text").get().strip() if dd.css("div.list-title::text").get() else "",
+                        "categories": categories,
+                        "comment": dd.css("div.list-comments::text").get(),
+                        "summary": ""  # We'll get this from the API in the pipeline
                     }
