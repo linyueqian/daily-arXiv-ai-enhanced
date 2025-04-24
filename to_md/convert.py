@@ -49,7 +49,7 @@ if __name__ == "__main__":
             [
                 template.format(
                     title=item["title"],
-                    authors=",".join(item["authors"]),
+                    authors=", ".join(item["authors"]),
                     summary=item["summary"],
                     url=item['abs'],
                     tldr=item['AI']['tldr'],
