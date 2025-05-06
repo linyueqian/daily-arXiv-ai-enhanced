@@ -51,7 +51,7 @@ if __name__ == "__main__":
                     title=item["title"],
                     authors=", ".join(item["authors"]),
                     summary=item["summary"],
-                    url=item['abs'],
+                    url=item['pdf'],
                     tldr=item['AI']['tldr'],
                     motivation=item['AI']['motivation'],
                     method=item['AI']['method'],
