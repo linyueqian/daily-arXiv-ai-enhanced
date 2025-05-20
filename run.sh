@@ -23,18 +23,27 @@ fi
 # Create data directory if it doesn't exist
 mkdir -p ../data
 
-# Run the spider
-cd daily_arxiv
-scrapy crawl arxiv
+# Set a timeout of 5 hours (18000 seconds) for the entire process
+timeout 18000 bash -c '
+    # Run the spider
+    cd daily_arxiv
+    scrapy crawl arxiv
 
-# Run the AI enhancement
-cd ../ai
-python enhance.py --data ../data/${TODAY}.jsonl
+    # Run the AI enhancement
+    cd ../ai
+    python enhance.py --data ../data/${TODAY}.jsonl
 
-# Convert to markdown
-cd ../to_md
-python convert.py --data ../data/${TODAY}_AI_enhanced_${LANGUAGE}.jsonl
+    # Convert to markdown
+    cd ../to_md
+    python convert.py --data ../data/${TODAY}_AI_enhanced_${LANGUAGE}.jsonl
 
-# Update the README
-cd ..
-python update_readme.py
+    # Update the README
+    cd ..
+    python update_readme.py
+'
+
+# Check if timeout occurred
+if [ $? -eq 124 ]; then
+    echo "Process timed out after 5 hours"
+    exit 1
+fi
